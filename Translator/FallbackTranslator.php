@@ -38,9 +38,9 @@ final class FallbackTranslator implements TranslatorInterface, TranslatorBagInte
     private $defaultLocale;
 
     /**
-     * @param string              $defaultLocale
+     * @param string $defaultLocale
      * @param TranslatorInterface $symfonyTranslator
-     * @param Translator          $externalTranslator
+     * @param Translator $externalTranslator
      */
     public function __construct($defaultLocale, TranslatorInterface $symfonyTranslator, Translator $externalTranslator)
     {
@@ -54,7 +54,7 @@ final class FallbackTranslator implements TranslatorInterface, TranslatorBagInte
      */
     public function trans($id, array $parameters = [], $domain = null, $locale = null)
     {
-        $id = (string) $id;
+        $id = (string)$id;
         if (empty($domain)) {
             $domain = 'messages';
         }
@@ -70,6 +70,14 @@ final class FallbackTranslator implements TranslatorInterface, TranslatorBagInte
             return $id;
         }
 
+        $locale = $locale ?? $this->getLocale();
+        $isLanguageWithCountry = (strlen($locale) > 2);
+
+        //try again with only language
+        if ($isLanguageWithCountry) {
+            return $this->trans($id, $parameters, $domain, substr($locale, 0, 2));
+        }
+
         $orgString = $this->symfonyTranslator->trans($id, $parameters, $domain, $this->defaultLocale);
 
         return $this->translateWithSubstitutedParameters($orgString, $locale, $parameters);
@@ -80,7 +88,7 @@ final class FallbackTranslator implements TranslatorInterface, TranslatorBagInte
      */
     public function transChoice($id, $number, array $parameters = [], $domain = null, $locale = null)
     {
-        $id = (string) $id;
+        $id = (string)$id;
         if (empty($domain)) {
             $domain = 'messages';
         }
@@ -134,9 +142,9 @@ final class FallbackTranslator implements TranslatorInterface, TranslatorBagInte
     }
 
     /**
-     * @param string $orgString  This is the string in the default locale. It has the values of $parameters in the string already.
-     * @param string $locale     you wan to translate to.
-     * @param array  $parameters
+     * @param string $orgString This is the string in the default locale. It has the values of $parameters in the string already.
+     * @param string $locale you wan to translate to.
+     * @param array $parameters
      *
      * @return string
      */
@@ -145,7 +153,7 @@ final class FallbackTranslator implements TranslatorInterface, TranslatorBagInte
         // Replace parameters
         $replacements = [];
         foreach ($parameters as $placeholder => $nonTranslatableValue) {
-            $replacements[(string) $nonTranslatableValue] = uniqid();
+            $replacements[(string)$nonTranslatableValue] = 1212121212; //constant placeholder
         }
 
         $replacedString = str_replace(array_keys($replacements), array_values($replacements), $orgString);
